@@ -4,6 +4,15 @@ inputs:
   imageName:
     required: true
     description: "Name of the docker image in homecentr/some-image format."
+  dockerHubUserName:
+    required: true
+    description: "DockerHub username"
+  dockerHubPassword:
+    required: true
+    description: "DockerHub password"
+  gitHubToken:
+    required: true
+    description: "GitHub token"
   runTests:
     required: false
     description: "Sets whether the repo has tests"
@@ -16,7 +25,7 @@ runs:
     - name: "Determine release version"
       uses: docker://ghcr.io/codfish/semantic-release-action:v1.9.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.gitHubToken }}
 
     - name: Verify Dockerfile with Hadolint
       uses: brpaz/hadolint-action@master
@@ -45,7 +54,7 @@ runs:
       if: env.RELEASE_VERSION != ''
       shell: bash
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        echo "${{ inputs.gitHubToken }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
         docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:latest
         docker push ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
@@ -55,7 +64,7 @@ runs:
       if: env.RELEASE_VERSION != ''
       shell: bash
       run: |
-        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        echo ${{ inputs.dockerHubPassword }} | docker login --username ${{ inputs.dockerHubUserName }} --password-stdin
         docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:$RELEASE_VERSION
         docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:latest
         docker push ${{ inputs.imageName }}:$RELEASE_VERSION
@@ -65,6 +74,6 @@ runs:
       if: env.RELEASE_VERSION != ''
       uses: peter-evans/dockerhub-description@v2.4.3
       env:
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        DOCKERHUB_USERNAME: ${{ inputs.dockerHubUserName }}
+        DOCKERHUB_PASSWORD: ${{ inputs.dockerHubPassword }}
         DOCKERHUB_REPOSITORY: ${{ inputs.imageName }}
