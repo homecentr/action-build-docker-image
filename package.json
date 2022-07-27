@@ -4,6 +4,9 @@
   "description": "",
   "author": "Lukas Holota",
   "license": "MIT",
+  "scripts": {
+    "test": "echo Running tests..."
+  },
   "release": {
     "branches": [
       "master"
