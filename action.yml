@@ -27,6 +27,7 @@ runs:
     - uses: actions/checkout@master
 
     - run: "echo '${{ inputs.skipPush }}'"
+      shell: bash
 
     - name: "Determine release version"
       uses: docker://ghcr.io/codfish/semantic-release-action:v1.9.0
