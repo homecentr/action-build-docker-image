@@ -5,9 +5,7 @@
   "author": "Lukas Holota",
   "license": "MIT",
   "release": {
-    "branches": [
-      "never-released-by-design"
-    ],
+    "branches": [],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
