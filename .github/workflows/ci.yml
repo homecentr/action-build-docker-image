@@ -16,6 +16,6 @@ jobs:
       - uses: ./
         with:
           imageName: "dummy"
-          skipPush: "true"
+          #skipPush: "true"
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           
