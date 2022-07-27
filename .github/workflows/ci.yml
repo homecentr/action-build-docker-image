@@ -1,9 +1,10 @@
-name: CI/CD on master
+name: CI
 on:
   push:
 
 jobs:
   build:
+    name: Execute action with dummy image
     runs-on: ubuntu-latest
     permissions:
       contents: write # To add version tags
@@ -15,5 +16,6 @@ jobs:
       - uses: ./
         with:
           imageName: "dummy"
+          skipPush: true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           
