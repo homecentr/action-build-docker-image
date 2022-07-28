@@ -1,0 +1,86 @@
+name: 'Build and release Docker image'
+description: 'Standardized Homecentr Docker image build and release'
+inputs:
+  imageName:
+    required: true
+    description: "Name of the docker image in homecentr/some-image format."
+  dockerHubUserName:
+    required: true
+    description: "DockerHub username"
+  dockerHubPassword:
+    required: true
+    description: "DockerHub password"
+  gitHubToken:
+    required: true
+    description: "GitHub token"
+  runTests:
+    required: false
+    description: "Sets whether the repo has tests"
+    default: "true"
+  skipPush:
+    required: false
+    default: "false"
+    description: "Skips all publishing steps"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@master
+
+    - run: "echo '${{ inputs.skipPush }}'"
+      shell: bash
+
+    - name: "Determine release version"
+      uses: docker://ghcr.io/codfish/semantic-release-action:v1.9.0
+      env:
+        GITHUB_TOKEN: ${{ inputs.gitHubToken }}
+
+    - name: Verify Dockerfile with Hadolint
+      uses: brpaz/hadolint-action@master
+
+    - name: "Build Docker image"
+      shell: bash
+      run: |
+        docker build . \
+            --tag "${{ inputs.imageName }}:ci" \
+            --label "org.label-schema.schema-version=1.0" \
+            --label "org.label-schema.vcs-ref=${GITHUB_SHA}" \
+            --label "org.label-schema.vcs-url=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.label-schema.url=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.label-schema.vendor=Homecentr" \
+            --label "version=$RELEASE_VERSION" \
+            --label "org.label-schema.build-date=$(date '+%F %T')"
+
+    - name: Run tests
+      if: inputs.runTests
+      shell: bash
+      run: |
+        yarn
+        yarn test
+      
+    - name: "Push to GitHub Packages"
+      if: env.RELEASE_VERSION != '' && inputs.skipPush == 'false'
+      shell: bash
+      run: |
+        echo "${{ inputs.gitHubToken }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
+        docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:latest
+        docker push ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
+        docker push ghcr.io/${{ inputs.imageName }}:latest
+
+    - name: "Publish to Docker Hub"
+      if: env.RELEASE_VERSION != '' && inputs.skipPush == 'false'
+      shell: bash
+      run: |
+        echo ${{ inputs.dockerHubPassword }} | docker login --username ${{ inputs.dockerHubUserName }} --password-stdin
+        docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:$RELEASE_VERSION
+        docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:latest
+        docker push ${{ inputs.imageName }}:$RELEASE_VERSION
+        docker push ${{ inputs.imageName }}:latest
+
+    - name: "Update Docker Hub description"
+      if: env.RELEASE_VERSION != '' && inputs.skipPush == 'false'
+      uses: peter-evans/dockerhub-description@v3.0.0
+      env:
+        DOCKERHUB_USERNAME: ${{ inputs.dockerHubUserName }}
+        DOCKERHUB_PASSWORD: ${{ inputs.dockerHubPassword }}
+        DOCKERHUB_REPOSITORY: ${{ inputs.imageName }}

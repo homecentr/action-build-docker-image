@@ -1,0 +1,20 @@
+{
+  "name": "@homecentr/action-build-docker-image",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Lukas Holota",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo Running tests..."
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github"
+    ]
+  }
+}

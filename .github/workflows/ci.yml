@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+
+jobs:
+  build:
+    name: Execute action with dummy image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # To add version tags
+      packages: write # To push docker image
+      issues: write   # Semantic release to link issues
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: ./
+        with:
+          imageName: "dummy"
+          skipPush: "true"
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          
