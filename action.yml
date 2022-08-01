@@ -39,16 +39,7 @@ runs:
 
     - name: "Build Docker image"
       shell: bash
-      run: |
-        docker build . \
-            --tag "${{ inputs.imageName }}:ci" \
-            --label "org.label-schema.schema-version=1.0" \
-            --label "org.label-schema.vcs-ref=${GITHUB_SHA}" \
-            --label "org.label-schema.vcs-url=https://github.com/${GITHUB_REPOSITORY}" \
-            --label "org.label-schema.url=https://github.com/${GITHUB_REPOSITORY}" \
-            --label "org.label-schema.vendor=Homecentr" \
-            --label "version=$RELEASE_VERSION" \
-            --label "org.label-schema.build-date=$(date '+%F %T')"
+      run: yarn build
 
     - name: Run tests
       if: inputs.runTests
