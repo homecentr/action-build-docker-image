@@ -4,6 +4,10 @@ inputs:
   imageName:
     required: true
     description: "Name of the docker image in homecentr/some-image format."
+  imageInterimTag:
+    required: false
+    description: "Image tag the build outputs"
+    default: "preview"
   dockerHubUserName:
     required: true
     description: "DockerHub username"
@@ -53,8 +57,8 @@ runs:
       shell: bash
       run: |
         echo "${{ inputs.gitHubToken }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
-        docker tag ${{ inputs.imageName }}:ci ghcr.io/${{ inputs.imageName }}:latest
+        docker tag ${{ inputs.imageName }}:${{ inputs.imageInterimTag }} ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
+        docker tag ${{ inputs.imageName }}:${{ inputs.imageInterimTag }} ghcr.io/${{ inputs.imageName }}:latest
         docker push ghcr.io/${{ inputs.imageName }}:$RELEASE_VERSION
         docker push ghcr.io/${{ inputs.imageName }}:latest
 
@@ -63,8 +67,8 @@ runs:
       shell: bash
       run: |
         echo ${{ inputs.dockerHubPassword }} | docker login --username ${{ inputs.dockerHubUserName }} --password-stdin
-        docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:$RELEASE_VERSION
-        docker tag ${{ inputs.imageName }}:ci ${{ inputs.imageName }}:latest
+        docker tag ${{ inputs.imageName }}:${{ inputs.imageInterimTag }} ${{ inputs.imageName }}:$RELEASE_VERSION
+        docker tag ${{ inputs.imageName }}:${{ inputs.imageInterimTag }} ${{ inputs.imageName }}:latest
         docker push ${{ inputs.imageName }}:$RELEASE_VERSION
         docker push ${{ inputs.imageName }}:latest
 
