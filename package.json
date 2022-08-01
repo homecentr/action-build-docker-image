@@ -5,6 +5,7 @@
   "author": "Lukas Holota",
   "license": "MIT",
   "scripts": {
+    "build": "echo Building image...",
     "test": "echo Running tests..."
   },
   "release": {
