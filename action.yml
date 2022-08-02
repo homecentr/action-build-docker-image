@@ -30,9 +30,6 @@ runs:
   steps:
     - uses: actions/checkout@master
 
-    - run: "echo '${{ inputs.skipPush }}'"
-      shell: bash
-
     - name: "Determine release version"
       uses: docker://ghcr.io/codfish/semantic-release-action:v1.9.0
       env:
@@ -42,8 +39,8 @@ runs:
       uses: brpaz/hadolint-action@master
 
     - name: "Build Docker image"
-      shell: bash
       run: yarn build
+      shell: bash
 
     - name: Run tests
       if: inputs.runTests
